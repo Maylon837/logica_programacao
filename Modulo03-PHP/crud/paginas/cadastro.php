@@ -48,37 +48,52 @@
     
 
     <?php
-        // POST é a variável.
-        // Conexão do cadastro com o mysql(não vai funcionar se o banco não existir). Importando a conexão.
-        if($_SERVER["REQUEST_METHOD"] == "POST"){
-            include("../conexao/conexao.php");
+        try {
+            // POST é a variável.
+            // Conexão do cadastro com o mysql(não vai funcionar se o banco não existir). Importando a conexão.
+            if($_SERVER["REQUEST_METHOD"] == "POST"){
+                include("../conexao/conexao.php");
 
-            $nome = $_POST["nome"];
-            $sobrenome = $_POST["sobrenome"];
-            $email = $_POST["email"];
-            $curso = $_POST["curso"];
+                $nome = $_POST["nome"];
+                $sobrenome = $_POST["sobrenome"];
+                $email = $_POST["email"];
+                $curso = $_POST["curso"];
 
-            //Criar
-            $hoje = new DateTime();
-            $id = $hoje ->format("Ym") . rand(100,999); // Y= year(ano) M = month(mes)
-            
-            echo $id;
+                //Criar
+                $hoje = new DateTime();
+                $id = $hoje ->format("Ym") . rand(100,999); // Y= year(ano) M = month(mes)
+                
+                echo $id;
 
-            //identificando em qual tabela será armazenado.
-            $sql = "INSERT INTO usuarios (id,nome,sobrenome,email,curso) values (?,?,?,?,?)";
-            // ? = evita o sql injection. seria por segurança, para evitar ataques.
-            $stmt = $conn -> prepare($sql);
-            $stmt -> bind_param("issss", $id,$nome,$sobrenome,$email,$curso); 
-            // na primeira "", preenchendo a ?. informando o tipo de dado de cada ?.
-            // stmt statement(afirmacao)= seria uma variavel. aleatória, não necessariamente stmt.
-            $stmt -> execute();
+                //identificando em qual tabela será armazenado.
+                $sql = "INSERT INTO usuarios (id,nome,sobrenome,email,curso) values (?,?,?,?,?)";
+                // ? = evita o sql injection. seria por segurança, para evitar ataques.
+                $stmt = $conn -> prepare($sql);
+                // criar conexão com o banco de dados
+                $stmt -> bind_param("issss", $id,$nome,$sobrenome,$email,$curso); 
+                // na primeira "", preenchendo a ?. informando o tipo de dado de cada ?.
+                // stmt statement(afirmacao)= seria uma variavel. aleatória, não necessariamente stmt.
+                $stmt -> execute();
 
-            echo "<div class='mensagem sucesso'>Usuário cadastrado com sucesso</div>";
+                echo "<div class='mensagem sucesso'>Usuário cadastrado com sucesso</div>";
 
-            $stmt -> close();
-            $conn -> close();
+                $stmt -> close();
+                $conn -> close();
+                // fecha o código após a execução
+                }
+                }  
+                catch(mysqli_sql_exception $e){
+                // Duplicate entry
+                if (str_contains($e->getMessage(), "Duplicate entry")) {
+                // str_contains = if 'in'
+                echo "<div class='mensagem erro'>E-mail já está cadastrado</div>";
 
-        }
+                } else {
+                echo "<div class='mensagem erro'>Erro ao cadastrar, Tente novamente mais tarde</div>";
+                }
+                echo $e->getMessage();
+                };
+                //correção de erros
 
     ?>
 </body>
